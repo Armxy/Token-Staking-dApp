@@ -1,7 +1,7 @@
 const { assert, use } = require('chai');
 const { default: Web3 } = require('web3');
 
-const TestToken = artifacts.require('TestToken');
+const MotherToken = artifacts.require('MotherToken');
 const TokenStaking = artifacts.require('TokenStaking');
 
 require('chai')
@@ -14,28 +14,28 @@ function tokenCorvert(n) {
 }
 
 contract('TokenStaking', ([creator, user]) => {
-  let testToken, tokenStaking;
+  let MTHRToken, tokenStaking;
 
   before(async () => {
     //Load contracts
-    testToken = await TestToken.new();
-    tokenStaking = await TokenStaking.new(testToken.address);
+    MTHRToken = await MotherToken.new();
+    tokenStaking = await TokenStaking.new(MTHRToken.address);
 
     //transfer 500k to TokenStaking
-    await testToken.transfer(tokenStaking.address, tokenCorvert('500000'));
+    await MTHRToken.transfer(tokenStaking.address, tokenCorvert('500000'));
 
     //sending some test tokens to User at address[1] { explaining where it comes from}
-    await testToken.transfer(user, tokenCorvert('2234'), {
+    await MTHRToken.transfer(user, tokenCorvert('2234'), {
       from: creator,
     });
   });
 
   // Test 1
   // 1.1 Checking if Token contract has a same name as expected
-  describe('TestToken deployment', async () => {
+  describe('MotherToken deployment', async () => {
     it('token deployed and has a name', async () => {
-      const name = await testToken.name();
-      assert.equal(name, 'TestToken');
+      const name = await MTHRToken.name();
+      assert.equal(name, 'MotherToken');
     });
   });
 
@@ -59,9 +59,9 @@ contract('TokenStaking', ([creator, user]) => {
       assert.equal(value, '137', 'custom APY set to 137');
     });
 
-    // 2.4 Checking if TokenStaking contract has 500k of TestTokens
-    it('staking contract has 500k TestTokens tokens inside', async () => {
-      let balance = await testToken.balanceOf(tokenStaking.address);
+    // 2.4 Checking if TokenStaking contract has 500k of MotherTokens
+    it('staking contract has 500k MotherTokens tokens inside', async () => {
+      let balance = await MTHRToken.balanceOf(tokenStaking.address);
       assert.equal(balance.toString(), tokenCorvert('500000'));
     });
   });
@@ -71,7 +71,7 @@ contract('TokenStaking', ([creator, user]) => {
   describe('TokenStaking stakeTokens function', async () => {
     let result;
     it('users balance is correct before staking', async () => {
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('2234'),
@@ -92,14 +92,14 @@ contract('TokenStaking', ([creator, user]) => {
     // 3.3 Testing stakeTokens function
     it('approving tokens, staking tokens, checking balance', async () => {
       // first approve tokens to be staked
-      await testToken.approve(tokenStaking.address, tokenCorvert('1000'), {
+      await MTHRToken.approve(tokenStaking.address, tokenCorvert('1000'), {
         from: user,
       });
       // stake tokens
       await tokenStaking.stakeTokens(tokenCorvert('1000'), { from: user });
 
       // check balance of user if they have 0 after staking
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('1234'),
@@ -109,7 +109,7 @@ contract('TokenStaking', ([creator, user]) => {
 
     // 3.4 checking balance of TokenStaking contract should be 500k +1000
     it('checking contract balance after staking', async () => {
-      result = await testToken.balanceOf(tokenStaking.address);
+      result = await MTHRToken.balanceOf(tokenStaking.address);
       assert.equal(
         result.toString(),
         tokenCorvert('501000'),
@@ -164,7 +164,7 @@ contract('TokenStaking', ([creator, user]) => {
 
     // 4.2 checking balance of TokenStaking contract after redistribution
     it('checking TokenStaking balance', async () => {
-      result = await testToken.balanceOf(tokenStaking.address);
+      result = await MTHRToken.balanceOf(tokenStaking.address);
       assert.equal(
         result.toString(),
         tokenCorvert('500999'),
@@ -174,7 +174,7 @@ contract('TokenStaking', ([creator, user]) => {
 
     // 4.3 check balance of user after redistribution should be X / 1000
     it('checking user balance', async () => {
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('1235'),
@@ -189,7 +189,7 @@ contract('TokenStaking', ([creator, user]) => {
     // 5.1 Testing unstaking function
     it('unstaking and checking users balance after unstake', async () => {
       await tokenStaking.unstakeTokens({ from: user });
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('2235'),
@@ -223,7 +223,7 @@ contract('TokenStaking', ([creator, user]) => {
 
     // 6.2 checking Users Balance before staking
     it('checking users balance before staking', async () => {
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('2235'),
@@ -234,14 +234,14 @@ contract('TokenStaking', ([creator, user]) => {
     // 6.3 testing if user able to stake in custom staking
     it('approving tokens, staking tokens, checking balance', async () => {
       // first approve tokens to be staked
-      await testToken.approve(tokenStaking.address, tokenCorvert('1234'), {
+      await MTHRToken.approve(tokenStaking.address, tokenCorvert('1234'), {
         from: user,
       });
       // stake tokens
       await tokenStaking.customStaking(tokenCorvert('1234'), { from: user });
 
       // check balance of user if they have 1001 after staking
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('1001'),
@@ -274,7 +274,7 @@ contract('TokenStaking', ([creator, user]) => {
     // 6.7 unstaking from custom staking and checking balance
     it('unstaking from custom staking and checking users balance ', async () => {
       await tokenStaking.customUnstake({ from: user });
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('2235'),
@@ -284,13 +284,13 @@ contract('TokenStaking', ([creator, user]) => {
   });
 
   // Test 7
-  describe('Claim Tst', async () => {
+  describe('Claim MTHR', async () => {
     let result;
     // 7.1 testing claim test token function
     it('trying to obtain 1000 test token', async () => {
       await tokenStaking.claimTst({ from: user });
 
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(result.toString(), tokenCorvert('3235'), '2235 + 1000');
     });
   });
@@ -322,13 +322,13 @@ contract('TokenStaking', ([creator, user]) => {
     let result;
     // 9.1 redistributing custom APY rewards
     it('staking at customStaking', async () => {
-      await testToken.approve(tokenStaking.address, tokenCorvert('1000'), {
+      await MTHRToken.approve(tokenStaking.address, tokenCorvert('1000'), {
         from: user,
       });
       // stake tokens
       await tokenStaking.customStaking(tokenCorvert('1000'), { from: user });
       // checking user balance after staking
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('2235'),
@@ -345,7 +345,7 @@ contract('TokenStaking', ([creator, user]) => {
     });
     // 9.2 checking new user balance after custom rewards
     it('checking user balance after custom APY rewards ', async () => {
-      result = await testToken.balanceOf(user);
+      result = await MTHRToken.balanceOf(user);
       assert.equal(
         result.toString(),
         tokenCorvert('2237'),

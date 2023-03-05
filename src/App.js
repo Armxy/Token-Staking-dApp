@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import classes from './App.module.css';
-import TestToken from '../src/abis/TestToken.json';
+import MotherToken from '../src/abis/MotherToken.json';
 import TokenStaking from '../src/abis/TokenStaking.json';
 import Staking from './components/Staking';
 import AdminTesting from './components/AdminTesting';
@@ -10,7 +10,7 @@ import Navigation from './components/Navigation';
 const App = () => {
   const [account, setAccount] = useState('Connecting to Metamask..');
   const [network, setNetwork] = useState({ id: '0', name: 'none' });
-  const [testTokenContract, setTestTokenContract] = useState('');
+  const [motherTokenContract, setMotherTokenContract] = useState('');
   const [tokenStakingContract, setTokenStakingContract] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [contractBalance, setContractBalance] = useState('0');
@@ -47,21 +47,21 @@ const App = () => {
       const networkType = await web3.eth.net.getNetworkType();
       setNetwork({ ...network, id: networkId, name: networkType });
 
-      //loading TestToken contract data
-      const testTokenData = TestToken.networks[networkId];
-      if (testTokenData) {
+      //loading MotherToken contract data
+      const motherTokenData = MotherToken.networks[networkId];
+      if (motherTokenData) {
         let web3 = window.web3;
-        const testToken = new web3.eth.Contract(
-          TestToken.abi,
-          testTokenData.address
+        const motherToken = new web3.eth.Contract(
+          MotherToken.abi,
+          motherTokenData.address
         );
-        setTestTokenContract(testToken);
-        //  fetching balance of Testtoken and storing in state
-        let testTokenBalance = await testToken.methods
+        setMotherTokenContract(motherToken);
+        //  fetching balance of MotherToken and storing in state
+        let motherTokenBalance = await motherToken.methods
           .balanceOf(accounts[0])
           .call();
         let convertedBalance = window.web3.utils.fromWei(
-          testTokenBalance.toString(),
+          motherTokenBalance.toString(),
           'Ether'
         );
         setUserBalance(convertedBalance);
@@ -69,7 +69,7 @@ const App = () => {
         //fetching contract balance
         //updating total staked balance
         const tempBalance = TokenStaking.networks[networkId];
-        let totalStaked = await testToken.methods
+        let totalStaked = await motherToken.methods
           .balanceOf(tempBalance.address)
           .call();
 
@@ -82,7 +82,7 @@ const App = () => {
       } else {
         setAppStatus(false);
         window.alert(
-          'TestToken contract is not deployed on this network, please change to testnet'
+          'MotherToken contract is not deployed on this network, please change to testnet'
         );
       }
 
@@ -176,7 +176,7 @@ const App = () => {
         let convertToWei = window.web3.utils.toWei(inputValue, 'Ether');
 
         //aproving tokens for spending
-        testTokenContract.methods
+        motherTokenContract.methods
           .approve(tokenStakingContract._address, convertToWei)
           .send({ from: account })
           .on('transactionHash', (hash) => {
@@ -334,12 +334,12 @@ const App = () => {
     }
   };
 
-  const claimTst = async () => {
+  const claimMTHR = async () => {
     if (!appStatus) {
     } else {
       setLoader(true);
       tokenStakingContract.methods
-        .claimTst()
+        .claimMTHR()
         .send({ from: account })
         .on('transactionHash', (hash) => {
           setLoader(false);
@@ -388,7 +388,7 @@ const App = () => {
             redistributeRewards={
               page === 1 ? redistributeRewards : redistributeCustomRewards
             }
-            claimTst={claimTst}
+            claimMTHR={claimMTHR}
             page={page}
           />
         </div>

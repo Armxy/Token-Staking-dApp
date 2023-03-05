@@ -3,7 +3,7 @@ require('babel-polyfill');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
 const mnemonic = fs
-  .readFileSync('.secret')
+  .readFileSync('.mnemonic_alt')
   .toString()
   .trim();
 const infuraKey = fs
@@ -19,13 +19,23 @@ module.exports = {
   networks: {
     development: {
       host: '127.0.0.1',
-      port: 7545,
+      port: 8545,
       network_id: '*', // Match any network id
+    },
+
+    motherstaker: {
+      provider: function () {
+        return new HDWalletProvider(
+          mnemonic,
+          `https://motherstaker708357ff-alt-producer-rpc.alt.technology`
+        );
+      },
+      network_id: 1000047
     },
 
     //ROPSTEN Test net
     ropsten: {
-      provider: function() {
+      provider: function () {
         return new HDWalletProvider(
           mnemonic,
           `https://ropsten.infura.io/v3/${infuraKey}`
@@ -38,7 +48,7 @@ module.exports = {
 
     //RINKEBY Test net
     rinkeby: {
-      provider: function() {
+      provider: function () {
         return new HDWalletProvider(
           mnemonic,
           `https://rinkeby.infura.io/v3/${infuraKey}`
@@ -66,6 +76,13 @@ module.exports = {
   api_keys: {
     etherscan: ethKey,
   },
+
+  compilers: {
+    solc: {
+      version: "0.8.10",
+    },
+  },
+
   // plugin for verification
   plugins: ['truffle-plugin-verify'],
 };

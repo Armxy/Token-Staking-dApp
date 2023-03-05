@@ -24,6 +24,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # security
-.secret
+.mnemonic
+.mnemonic_alt
 .infuraKey
 .ethKey

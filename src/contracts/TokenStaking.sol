@@ -1,10 +1,11 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.10;
 
-import "./TestToken.sol";
+import "./MotherToken.sol";
 
 contract TokenStaking {
     string public name = "Yield Farming / Token dApp";
-    TestToken public testToken;
+    MotherToken public MTHRToken;
 
     //declaring owner state variable
     address public owner;
@@ -35,8 +36,8 @@ contract TokenStaking {
     address[] public stakers;
     address[] public customStakers;
 
-    constructor(TestToken _testToken) public payable {
-        testToken = _testToken;
+    constructor(MotherToken _MTHRToken) payable {
+        MTHRToken = _MTHRToken;
 
         //assigning owner on deployment
         owner = msg.sender;
@@ -49,7 +50,7 @@ contract TokenStaking {
         require(_amount > 0, "amount cannot be 0");
 
         //User adding test tokens
-        testToken.transferFrom(msg.sender, address(this), _amount);
+        MTHRToken.transferFrom(msg.sender, address(this), _amount);
         totalStaked = totalStaked + _amount;
 
         //updating staking balance for user by mapping
@@ -76,7 +77,7 @@ contract TokenStaking {
         require(balance > 0, "amount has to be more than 0");
 
         //transfer staked tokens back to user
-        testToken.transfer(msg.sender, balance);
+        MTHRToken.transfer(msg.sender, balance);
         totalStaked = totalStaked - balance;
 
         //reseting users staking balance
@@ -89,7 +90,7 @@ contract TokenStaking {
     // different APY Pool
     function customStaking(uint256 _amount) public {
         require(_amount > 0, "amount cannot be 0");
-        testToken.transferFrom(msg.sender, address(this), _amount);
+        MTHRToken.transferFrom(msg.sender, address(this), _amount);
         customTotalStaked = customTotalStaked + _amount;
         customStakingBalance[msg.sender] =
             customStakingBalance[msg.sender] +
@@ -105,7 +106,7 @@ contract TokenStaking {
     function customUnstake() public {
         uint256 balance = customStakingBalance[msg.sender];
         require(balance > 0, "amount has to be more than 0");
-        testToken.transfer(msg.sender, balance);
+        MTHRToken.transfer(msg.sender, balance);
         customTotalStaked = customTotalStaked - balance;
         customStakingBalance[msg.sender] = 0;
         customIsStakingAtm[msg.sender] = false;
@@ -125,7 +126,7 @@ contract TokenStaking {
             balance = balance / 100000;
 
             if (balance > 0) {
-                testToken.transfer(recipient, balance);
+                MTHRToken.transfer(recipient, balance);
             }
         }
     }
@@ -139,7 +140,7 @@ contract TokenStaking {
             balance = balance / 100000;
 
             if (balance > 0) {
-                testToken.transfer(recipient, balance);
+                MTHRToken.transfer(recipient, balance);
             }
         }
     }
@@ -155,11 +156,11 @@ contract TokenStaking {
         customAPY = _value;
     }
 
-    //cliam test 1000 Tst (for testing purpose only !!)
-    function claimTst() public {
+    //cliam test 1000 MTHR (for testing purpose only !!)
+    function claimMTHR() public {
         address recipient = msg.sender;
-        uint256 tst = 1000000000000000000000;
-        uint256 balance = tst;
-        testToken.transfer(recipient, balance);
+        uint256 MTHR = 1000000000000000000000;
+        uint256 balance = MTHR;
+        MTHRToken.transfer(recipient, balance);
     }
 }

@@ -5,7 +5,7 @@ const AdminTesting = (props) => {
   return (
     <div className={classes.for_testing}>
       <p>FOR TESTING PURPOSE ONLY</p>
-      <button onClick={props.claimTst}>Claim for 1000 Tst (User)</button>
+      <button onClick={props.claimMTHR}>Claim for 1000 $MTHR (User)</button>
       &nbsp; &nbsp;
       <button onClick={props.redistributeRewards}>
         {props.page === 1
@@ -17,7 +17,7 @@ const AdminTesting = (props) => {
           Selected Network: <b>{props.network.name}</b>
           &nbsp; id: <b>{props.network.id}</b>
         </p>
-        <p>Contract Balance: {props.contractBalance} TestToken (Tst) </p>
+        <p>Contract Balance: {props.contractBalance} MotherToken ($MTHR) </p>
         <p>Staking Contract address: {props.tokenStakingContract._address}</p>
       </div>
     </div>
