@@ -39,6 +39,9 @@
   "license": "ISC",
   "devDependencies": {
     "@truffle/hdwallet-provider": "^1.4.0",
+    "canvas-confetti": "^1.6.0",
+    "lottie-web": "^5.10.2",
+    "sweetalert2": "^11.7.3",
     "truffle-plugin-verify": "^0.5.8"
   }
 }

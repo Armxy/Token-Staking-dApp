@@ -6,6 +6,8 @@ import TokenStaking from '../src/abis/TokenStaking.json';
 import Staking from './components/Staking';
 import AdminTesting from './components/AdminTesting';
 import Navigation from './components/Navigation';
+import Swal from 'sweetalert2';
+import confetti from 'canvas-confetti';
 
 const App = () => {
   const [account, setAccount] = useState('Connecting to Metamask..');
@@ -21,6 +23,16 @@ const App = () => {
   const [userBalance, setUserBalance] = useState('0');
   const [apy, setApy] = useState([0, 0]);
   const [page, setPage] = useState(1);
+
+  const popSounds = [
+    new Audio('/audio/Cartoon-Bubble-Pop-01.m4a'),
+    new Audio('/audio/Mouth-Sound-Pop-01.wav'),
+    new Audio('/audio/Pop-Tone.wav'),
+    new Audio('/audio/Synth-Pop-Small-01.m4a'),
+  ];
+
+  const randomRange = (min, max) => min + Math.random() * (max - min)
+  const randomIndex = (array) => randomRange(0, array.length) | 0
 
   useEffect(() => {
     //connecting to ethereum blockchain
@@ -42,13 +54,47 @@ const App = () => {
       const accounts = await web3.eth.getAccounts();
       setAccount(accounts[0]);
 
+      const preferredNetwork = {
+        chainId: web3.utils.toHex('1000047'),
+        chainName: 'Mother Staker Devnet Rollup',
+        nativeCurrency: {
+          name: 'Mother Staker Coin',
+          symbol: 'MSTKR',
+          decimals: 18
+        },
+        rpcUrls: ['https://motherstaker708357ff-alt-producer-rpc.alt.technology'],
+        blockExplorerUrls: ['https://explorer.alt.technology?rpcUrl=https://motherstaker708357ff-alt-producer-rpc.alt.technology']
+      };
+
       //loading users network ID and name
-      const networkId = await web3.eth.net.getId();
-      const networkType = await web3.eth.net.getNetworkType();
+      let networkId = await web3.eth.net.getId();
+      let networkType = await web3.eth.net.getNetworkType();
       setNetwork({ ...network, id: networkId, name: networkType });
 
       //loading MotherToken contract data
-      const motherTokenData = MotherToken.networks[networkId];
+      let motherTokenData = MotherToken.networks[networkId];
+
+      //try Add preferred chain
+      if (!motherTokenData) {
+
+        await window.ethereum
+          .request({
+            method: 'wallet_addEthereumChain',
+            params: [preferredNetwork]
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+        //loading users network ID and name again!
+        networkId = await web3.eth.net.getId();
+        networkType = await web3.eth.net.getNetworkType();
+        setNetwork({ ...network, id: networkId, name: networkType });
+
+        //loading MotherToken contract data again!
+        motherTokenData = MotherToken.networks[networkId];
+      }
+
       if (motherTokenData) {
         let web3 = window.web3;
         const motherToken = new web3.eth.Contract(
@@ -81,9 +127,19 @@ const App = () => {
         setContractBalance(convertedBalance);
       } else {
         setAppStatus(false);
-        window.alert(
+        /*window.alert(
           'MotherToken contract is not deployed on this network, please change to testnet'
-        );
+        );*/
+        Swal
+          .fire({
+            title: 'Error!',
+            text: 'MotherToken contract is not deployed on this network, please change to "' + preferredNetwork.chainName + '"',
+            icon: 'error',
+            confirmButtonText: 'Try again',
+            allowEscapeKey: false,
+            allowOutsideClick: false
+          })
+          .then((res) => { window.location.reload(); });
       }
 
       //loading TokenStaking contract data
@@ -140,9 +196,9 @@ const App = () => {
         setApy([tempApy, tempcustomApy]);
       } else {
         setAppStatus(false);
-        window.alert(
+        /*window.alert(
           'TokenStaking contract is not deployed on this network, please change to testnet'
-        );
+        );*/
       }
 
       //removing loader
@@ -191,6 +247,21 @@ const App = () => {
                 .on('receipt', (receipt) => {
                   setLoader(false);
                   fetchDataFromBlockchain();
+
+                  popSounds[randomIndex(popSounds)].play();
+
+                  confetti({
+                      particleCount: 40,
+                      spread: 70,
+                      shapes: ['circle']
+                  });
+
+                  Swal
+                    .fire({
+                      title: 'Success!',
+                      text: 'You\'ve successfully stake '+parseInt(inputValue).toLocaleString()+' MotherToken ($MTHR)',
+                      icon: 'success'
+                    });
                 })
                 .on('confirmation', (confirmationNumber, receipt) => {
                   setLoader(false);
@@ -207,6 +278,21 @@ const App = () => {
                 .on('receipt', (receipt) => {
                   setLoader(false);
                   fetchDataFromBlockchain();
+
+                  popSounds[randomIndex(popSounds)].play();
+
+                  confetti({
+                      particleCount: 40,
+                      spread: 70,
+                      shapes: ['circle']
+                  });
+
+                  Swal
+                    .fire({
+                      title: 'Success!',
+                      text: 'You\'ve successfully stake '+parseInt(inputValue).toLocaleString()+' MotherToken ($MTHR)',
+                      icon: 'success'
+                    });
                 })
                 .on('confirmation', (confirmationNumber, receipt) => {
                   setLoader(false);
@@ -214,7 +300,7 @@ const App = () => {
                 });
             }
           })
-          .on('error', function(error) {
+          .on('error', function (error) {
             setLoader(false);
             console.log('Error Code:', error.code);
             console.log(error.message);
@@ -241,12 +327,27 @@ const App = () => {
           .on('receipt', (receipt) => {
             setLoader(false);
             fetchDataFromBlockchain();
+
+            popSounds[randomIndex(popSounds)].play();
+
+            confetti({
+                particleCount: 40,
+                spread: 70,
+                shapes: ['circle']
+            });
+
+            Swal
+              .fire({
+                title: 'Success!',
+                text: 'You\'ve successfully unstake all your MotherToken ($MTHR)',
+                icon: 'success'
+              });
           })
           .on('confirmation', (confirmationNumber, receipt) => {
             setLoader(false);
             fetchDataFromBlockchain();
           })
-          .on('error', function(error) {
+          .on('error', function (error) {
             console.log('Error Code:', error.code);
             console.log(error.message);
             setLoader(false);
@@ -270,7 +371,7 @@ const App = () => {
             fetchDataFromBlockchain();
           })
 
-          .on('error', function(error) {
+          .on('error', function (error) {
             console.log('Error Code:', error.code);
             console.log(error.message);
             setLoader(false);
@@ -299,7 +400,7 @@ const App = () => {
           setLoader(false);
           fetchDataFromBlockchain();
         })
-        .on('error', function(error) {
+        .on('error', function (error) {
           console.log('Error Code:', error.code);
           console.log(error.code);
           setLoader(false);
@@ -326,7 +427,7 @@ const App = () => {
           setLoader(false);
           fetchDataFromBlockchain();
         })
-        .on('error', function(error) {
+        .on('error', function (error) {
           console.log('Error Code:', error.code);
           console.log(error.code);
           setLoader(false);
@@ -353,7 +454,7 @@ const App = () => {
           setLoader(false);
           fetchDataFromBlockchain();
         })
-        .on('error', function(error) {
+        .on('error', function (error) {
           console.log('Error Code:', error.code);
           console.log(error.code);
           setLoader(false);
@@ -396,5 +497,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;
