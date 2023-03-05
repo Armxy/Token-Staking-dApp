@@ -28,3 +28,6 @@ yarn-error.log*
 .mnemonic_alt
 .infuraKey
 .ethKey
+
+# Local Netlify folder
+.netlify
